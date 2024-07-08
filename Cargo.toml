@@ -1,0 +1,16 @@
+[workspace.lints.rust]
+unsafe_code = "forbid"
+# unused = "allow" # For experimental dev.
+
+[workspace]
+resolver = "2"
+members = [
+    # -- Application Libraries
+
+    # -- Application Services
+    "crates/services/opentelemetry-tail-yew",
+]
+
+# NOTE: Only the crates that are utilized in two or more sub-crates and benefit from global management
+#       are handled in workspace.dependencies. Other strategies may also be valid.
+[workspace.dependencies]
