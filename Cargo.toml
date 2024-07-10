@@ -9,6 +9,7 @@ members = [
 
     # -- Application Services
     "crates/services/opentelemetry-tail-yew",
+    "crates/services/opentelemetry-tail-axum",
 ]
 
 # NOTE: Only the crates that are utilized in two or more sub-crates and benefit from global management
