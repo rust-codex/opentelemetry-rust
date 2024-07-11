@@ -1,11 +1,14 @@
 mod pages;
+pub mod websocket;
 
 use pages::logs::Logs;
 use pages::metrics::Metrics;
 use pages::page_not_found::PageNotFound;
 use pages::traces::Traces;
-use yew_router::prelude::*;
+use websocket::WebsocketReactor;
 use yew::prelude::*;
+use yew_agent::reactor::ReactorProvider;
+use yew_router::prelude::*;
 
 #[derive(Routable, PartialEq, Eq, Clone, Debug)]
 pub enum Route {
@@ -51,6 +54,7 @@ impl Component for App {
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
+            <ReactorProvider<WebsocketReactor> path="/workerreactor.js">
             <BrowserRouter>
                 <div class="app">
                     <header class="header">
@@ -66,6 +70,7 @@ impl Component for App {
                     <Switch<Route> render={switch} />
                 </div>
             </BrowserRouter>
+            </ReactorProvider<WebsocketReactor>>
         }
     }
 }
@@ -86,9 +91,4 @@ impl App {
             </nav>
         }
     }
-}
-
-fn main() {
-    wasm_logger::init(wasm_logger::Config::default());
-    yew::Renderer::<App>::new().render();
 }
