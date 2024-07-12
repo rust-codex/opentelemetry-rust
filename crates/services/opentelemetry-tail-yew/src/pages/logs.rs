@@ -1,7 +1,12 @@
 use yew::prelude::*;
+use yew_agent::reactor::use_reactor_subscription;
+
+use crate::websocket::WebsocketReactor;
 
 #[function_component(Logs)]
 pub fn logs() -> Html {
+    let reactor = use_reactor_subscription::<WebsocketReactor>();
+
     html! {
         <main class="app-body">
             <nav class="app-body-navigation">
@@ -45,6 +50,21 @@ pub fn logs() -> Html {
                             </tr>
                         </thead>
                         <tbody>
+                            {
+                                reactor.iter().last().cloned().map(|value|{
+                                    let v = (*value).clone();
+
+                                    v.into_iter().map(|v| {
+                                        html!{
+                                            <tr class="info">
+                                                <td>{"2024-07-06 12:00:00"}</td>
+                                                <td>{"INFO"}</td>
+                                                <td>{v}</td>
+                                            </tr>
+                                        }
+                                    }).collect::<Html>()
+                                })
+                            }
                             <tr class="info">
                                 <td>{"2024-07-06 12:00:00"}</td>
                                 <td>{"INFO"}</td>
