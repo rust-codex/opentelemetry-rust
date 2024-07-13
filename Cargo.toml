@@ -15,3 +15,5 @@ members = [
 # NOTE: Only the crates that are utilized in two or more sub-crates and benefit from global management
 #       are handled in workspace.dependencies. Other strategies may also be valid.
 [workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

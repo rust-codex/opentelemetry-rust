@@ -9,8 +9,12 @@
     },
     "cSpell.words": [
         "axum",
+        "opentelemetry",
         "otel",
+        "prost",
         "recv",
+        "reqwasm",
+        "routable",
         "tokio"
     ]
 }
