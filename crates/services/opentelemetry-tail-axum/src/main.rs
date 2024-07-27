@@ -9,8 +9,14 @@ use axum::{
     Router,
 };
 use axum_extra::protobuf::Protobuf;
+use chrono::{Locale, TimeZone, Utc};
+use chrono_tz::Tz;
 use futures::{sink::SinkExt, stream::StreamExt};
-use opentelemetry_proto::tonic::logs::v1::LogsData;
+use opentelemetry_proto::tonic::{
+    common::v1::{any_value::Value, AnyValue},
+    logs::v1::LogsData,
+};
+use serde::Serialize;
 use std::{net::SocketAddr, sync::Arc};
 use tokio::sync::broadcast;
 use tower_http::trace::{self, TraceLayer};
@@ -53,12 +59,52 @@ async fn main() {
     .unwrap();
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct Log {
+    pub timestamp: String,
+    pub level: String,
+    pub message: String,
+}
+
 async fn otel_handler(
     State(state): State<Arc<AppState>>,
     Protobuf(payload): Protobuf<LogsData>,
 ) -> impl IntoResponse {
-    info!("{:?}", serde_json::to_string(&payload).unwrap());
-    let _ = state.tx.send(serde_json::to_string(&payload).unwrap());
+    // info!("{:?}", serde_json::to_string(&payload).unwrap());
+
+    let mut logs: Vec<Log> = Vec::new();
+
+    let tz: Tz = "America/Sao_Paulo".parse().unwrap();
+
+    for rl in payload.resource_logs {
+        for sl in rl.scope_logs {
+            for lr in sl.log_records {
+                let body = lr.body.unwrap_or(AnyValue {
+                    value: Some(Value::StringValue("-".into())),
+                });
+
+                let value = match body.value.unwrap() {
+                    Value::StringValue(v) => v,
+                    // outros casos podem ser tratados aqui
+                    _ => "no-string".into(),
+                };
+
+                let dt = Utc.timestamp_nanos(lr.observed_time_unix_nano as i64);
+                let local = dt
+                    .with_timezone(&tz)
+                    .format_localized("%b %d %X.%3f", Locale::pt_BR)
+                    .to_string();
+
+                logs.push(Log {
+                    level: lr.severity_text,
+                    timestamp: local,
+                    message: value,
+                });
+            }
+        }
+    }
+
+    let _ = state.tx.send(serde_json::to_string(&logs).unwrap());
 
     (StatusCode::OK, "Ok")
 }
