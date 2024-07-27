@@ -56,10 +56,10 @@ pub fn logs() -> Html {
 
                                     v.into_iter().map(|v| {
                                         html!{
-                                            <tr class="info">
-                                                <td>{"2024-07-06 12:00:00"}</td>
-                                                <td>{"INFO"}</td>
-                                                <td>{v}</td>
+                                            <tr class={&v.level.to_lowercase()}>
+                                                <td>{v.timestamp}</td>
+                                                <td>{v.level}</td>
+                                                <td>{v.message}</td>
                                             </tr>
                                         }
                                     }).collect::<Html>()
